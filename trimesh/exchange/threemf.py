@@ -317,15 +317,15 @@ def export_3MF(mesh, batch_size=4096, compression=zipfile.ZIP_DEFLATED, compress
     # the model `unit` is limited to a few names: write the scene's
     # units if they are one of them and otherwise default to millimeter
     unit = "millimeter"
-    if mesh.units is not None:
+    try:
+        scale = units.to_inch(mesh.units)
         for valid in ("micron", "millimeter", "centimeter", "inch", "foot", "meter"):
-            try:
-                if np.isclose(units.unit_conversion(mesh.units, valid), 1.0):
-                    unit = valid
-                    break
-            except ValueError:
-                # unrecognized units string
+            if np.isclose(units.to_inch(valid), scale):
+                unit = valid
                 break
+    except (AttributeError, ValueError):
+        # no units or units that are not recognized
+        pass
 
     # xml namespaces
     model_nsmap = {

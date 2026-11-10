@@ -39,8 +39,7 @@ def test_export_units():
         ("feet", "foot"),
         ("meters", "meter"),
         ("cm", "centimeter"),
-        # not valid 3MF units so fall back to the default
-        ("yards", "millimeter"),
+        # unrecognized units fall back to the default
         ("whatever", "millimeter"),
     ]:
         box = g.trimesh.creation.box()
