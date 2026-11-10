@@ -5,7 +5,7 @@ from collections import defaultdict
 
 import numpy as np
 
-from .. import graph, util
+from .. import graph, units, util
 from ..constants import log
 from ..util import unique_name
 
@@ -314,6 +314,19 @@ def export_3MF(mesh, batch_size=4096, compression=zipfile.ZIP_DEFLATED, compress
     graph = mesh.graph.to_networkx()
     base_frame = mesh.graph.base_frame
 
+    # the model `unit` is limited to a few names: write the scene's
+    # units if they are one of them and otherwise default to millimeter
+    unit = "millimeter"
+    if mesh.units is not None:
+        for valid in ("micron", "millimeter", "centimeter", "inch", "foot", "meter"):
+            try:
+                if np.isclose(units.unit_conversion(mesh.units, valid), 1.0):
+                    unit = valid
+                    break
+            except ValueError:
+                # unrecognized units string
+                break
+
     # xml namespaces
     model_nsmap = {
         None: "http://schemas.microsoft.com/3dmanufacturing/core/2015/02",
@@ -356,7 +369,7 @@ def export_3MF(mesh, batch_size=4096, compression=zipfile.ZIP_DEFLATED, compress
             xf.write_declaration()
 
             # stream elements
-            with xf.element("model", {"unit": "millimeter"}, nsmap=model_nsmap):
+            with xf.element("model", {"unit": unit}, nsmap=model_nsmap):
                 # objects with mesh data and/or references to other objects
                 with xf.element("resources"):
                     # stream objects with actual mesh data

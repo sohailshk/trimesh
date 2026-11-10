@@ -31,6 +31,26 @@ def test_units():
     assert all(converter(u, "inches") > 1e-12 for u in units)
 
 
+def test_export_units():
+    # the unit of the scene should be written to the model
+    for units, expected in [
+        ("millimeters", "millimeter"),
+        ("inches", "inch"),
+        ("feet", "foot"),
+        ("meters", "meter"),
+        ("cm", "centimeter"),
+        # not valid 3MF units so fall back to the default
+        ("yards", "millimeter"),
+        ("whatever", "millimeter"),
+    ]:
+        box = g.trimesh.creation.box()
+        box.units = units
+        loaded = g.trimesh.load(
+            g.trimesh.util.wrap_as_stream(box.export(file_type="3mf")), file_type="3mf"
+        )
+        assert loaded.units == expected, units
+
+
 def test_more_units():
     # make sure that units survive down to the mesh
     s = g.trimesh.load_scene(g.os.path.join(g.dir_models, "featuretype.3MF"))
