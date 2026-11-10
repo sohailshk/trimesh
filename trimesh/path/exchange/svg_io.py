@@ -213,6 +213,14 @@ def transform_to_matrices(transform: str) -> NDArray[np.float64]:
             mat = _IDENTITY.copy()
             mat[:2, :2] *= values
             matrices.append(mat)
+        elif key == "skewx":
+            # x' = x + tan(angle) * y with the angle in degrees
+            matrices.append(_IDENTITY.copy())
+            matrices[-1][0, 1] = np.tan(np.radians(values[0]))
+        elif key == "skewy":
+            # y' = y + tan(angle) * x with the angle in degrees
+            matrices.append(_IDENTITY.copy())
+            matrices[-1][1, 0] = np.tan(np.radians(values[0]))
         else:
             log.debug(f"unknown SVG transform: {key}")
 

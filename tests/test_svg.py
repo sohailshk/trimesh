@@ -269,6 +269,20 @@ def test_rect_bounds():
             raise ValueError(f"{bounds_ours} != {bounds_truth}\nfor:\n{pair['truth']}")
 
 
+def test_skew_transform():
+    # skewX(a) shifts x by tan(a) * y and skewY(a) shifts y by tan(a) * x
+    template = '<svg xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="20" height="30" transform="{}"/></svg>'
+    for transform, bounds in [
+        ("skewX(45)", [[20, 10], [70, 40]]),
+        ("skewY(45)", [[10, 20], [30, 70]]),
+        ("translate(1 2) skewX(45)", [[21, 12], [71, 42]]),
+    ]:
+        loaded = g.trimesh.load(
+            g.trimesh.util.wrap_as_stream(template.format(transform)), file_type="svg"
+        )
+        assert g.np.allclose(loaded.bounds, bounds), transform
+
+
 if __name__ == "__main__":
     g.trimesh.util.attach_to_log()
     # test_roundtrip()
